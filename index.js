@@ -1,4 +1,5 @@
 const express = require('express');
+var jwt = require('jsonwebtoken');
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
@@ -8,6 +9,22 @@ require('dotenv').config()
 //middleware
 app.use(express.json())
 app.use(cors());
+
+function verifyToken(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+        return res.status(401).send({ 'message': 'unauthorized access' })
+    }
+    const token = authHeader.split('')[1]
+    jwt.verify(token, process.env, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ 'message': 'Forbidden' })
+        }
+        req.decoded = decoded
+        next()
+    })
+
+}
 
 //bike-manger
 //xY2uDi7RYlBQzw90
@@ -74,13 +91,28 @@ async function run() {
         //     res.send(result)
         // })
         //
-        app.get('/myitem', async (req, res) => {
+        app.get('/myitem', verifyToken, async (req, res) => {
+            const decodedEmail = req.decoded.email
             const email = req.query.email
-            console.log(email);
-            const query = { email: email }
-            const cursor = bikeCollection.find(query)
-            const myItems = await cursor.toArray()
-            res.send(myItems)
+            if (email === decodedEmail) {
+                const query = { email: email }
+                const cursor = bikeCollection.find(query)
+                const myItems = await cursor.toArray()
+                res.send(myItems)
+
+            }
+            else {
+                res.status(403).send({ message: 'Forbidden Access' })
+            }
+
+        })
+        //create token
+        app.post('/login', (req, res) => {
+            const user = req.body
+            const accesToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            })
+            res.send({ accesToken })
         })
 
 
