@@ -88,14 +88,7 @@ async function run() {
             const result = await bikeCollection.deleteOne(query)
             res.send(result)
         })
-        //delete my itemmmmgdfg
-        // app.delete('/myitem/:id', async (req, res) => {
-        //     const id = req.params.id
-        //     const query = { _id: ObjectId(id) }
-        //     const result = await bikeCollection.deleteOne(query)
-        //     res.send(result)
-        // })
-        //
+
         app.get('/myitem', verifyToken, async (req, res) => {
             const decodedEmail = req.decoded.email
             const email = req.query.email
