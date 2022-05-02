@@ -12,17 +12,22 @@ app.use(cors());
 
 function verifyToken(req, res, next) {
     const authHeader = req.headers.authorization
+    console.log('inside verifyJwt', authHeader);
     if (!authHeader) {
-        return res.status(401).send({ 'message': 'unauthorized access' })
+        return res.status(401).send({ message: 'unauthorized access' })
     }
-    const token = authHeader.split('')[1]
-    jwt.verify(token, process.env, (err, decoded) => {
+    const token = authHeader.split(' ')[1]
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
             return res.status(403).send({ 'message': 'Forbidden' })
         }
+        console.log('decoded', decoded);
         req.decoded = decoded
         next()
     })
+
+
+
 
 }
 
@@ -83,7 +88,7 @@ async function run() {
             const result = await bikeCollection.deleteOne(query)
             res.send(result)
         })
-        //delete my item
+        //delete my itemmmm
         // app.delete('/myitem/:id', async (req, res) => {
         //     const id = req.params.id
         //     const query = { _id: ObjectId(id) }
@@ -102,8 +107,15 @@ async function run() {
 
             }
             else {
-                res.status(403).send({ message: 'Forbidden Access' })
+                res.status(403).send({ message: 'forbidden acces' })
             }
+
+
+
+
+
+
+
 
         })
         //create token..
